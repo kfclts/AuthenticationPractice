@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es6"
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "include": [
+        "models",
+        "routes",
+        "util",
+        "./app.js",
+        "controllers"
+    ],
+    "typeAcquisition": {
+        "include": [
+            "sequelize",
+            "mongoose",
+            "express-session",
+            "connect-mongodb-session"
+        ]
+    }
+}
