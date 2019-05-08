@@ -17,7 +17,8 @@
             "sequelize",
             "mongoose",
             "express-session",
-            "connect-mongodb-session"
+            "connect-mongodb-session",
+            "bcryptjs"
         ]
     }
 }
