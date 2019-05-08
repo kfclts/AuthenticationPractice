@@ -20,7 +20,8 @@
             "express-session",
             "connect-mongodb-session",
             "bcryptjs",
-            "csurf"
+            "csurf",
+            "connect-flash"
         ]
     }
 }
