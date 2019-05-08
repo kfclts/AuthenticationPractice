@@ -10,7 +10,8 @@
         "routes",
         "util",
         "./app.js",
-        "controllers"
+        "controllers",
+        "middleware"
     ],
     "typeAcquisition": {
         "include": [
@@ -18,7 +19,8 @@
             "mongoose",
             "express-session",
             "connect-mongodb-session",
-            "bcryptjs"
+            "bcryptjs",
+            "csurf"
         ]
     }
 }
