@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const bcrypt = require('bcryptjs');
 //const nodemailer = require('nodemailer');
 //const sendgridTransport = require('nodemailer-sendgrid-transport');
@@ -6,14 +8,6 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const User = require('../models/user');
 
-// const transporter = nodemailer.createTransport(
-//   sendgridTransport({
-//     auth: {
-//       api_key:
-//         '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'
-//     }
-//   })
-// ); 
 
 exports.getLogin = (req, res, next) => {
   //console.log(req.get('Cookie').split(';')[0].trim().split('=')[1]);
@@ -109,17 +103,11 @@ exports.postSignup = (req, res, next) => {
           res.redirect('/login');
           return sgMail.send({
             to: email,
-            from: 'test@example.com',
-            subject: 'Sending with Twilio SendGrid is Fun',
+            from: 'shop@node-complete.com',
+            subject: 'Signup succeeded!',
             text: 'and easy to do anywhere, even with Node.js',
-            html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-          })
-          // return transporter.sendMail({
-          //   to: email,
-          //   from: 'shop@node-complete.com',
-          //   subject: 'Signup succeeded!',
-          //   html: '<h1>You successfully signed up!</h1>'
-          // });
+            html: '<h1>You successfully signed up!</h1>'
+          });
         })
         .catch(err => {
           console.log(err);
@@ -148,5 +136,40 @@ exports.getReset = (req, res, next) => {
     path: '/reset',
     pageTitle: 'Reset Password',
     errorMessage: message
+  });
+};
+
+exports.postReset = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/reset');
+    }
+    const token = buffer.toString('hex');
+    User.findOne({ email: req.body.email })
+      .then(user => {
+        if (!user) {
+          req.flash('error', 'No account with that email found.');
+          return res.redirect('/reset');
+        }
+        user.resetToken = token;
+        user.resetTokenExpiration = Date.now() + 3600000;
+        return user.save();
+      })
+      .then(result => {
+        res.redirect('/');
+        sgMail.send({
+          to: req.body.email,
+          from: 'shop@node-complete.com',
+          subject: 'Password reset',
+          html: `
+            <p>You requested a password reset</p>
+            <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+          `
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
   });
 };
