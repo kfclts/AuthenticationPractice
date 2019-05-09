@@ -21,7 +21,8 @@
             "connect-mongodb-session",
             "bcryptjs",
             "csurf",
-            "connect-flash"
+            "connect-flash",
+            "nodemailer"
         ]
     }
 }

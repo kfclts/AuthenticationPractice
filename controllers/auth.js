@@ -1,6 +1,19 @@
 const bcrypt = require('bcryptjs');
+//const nodemailer = require('nodemailer');
+//const sendgridTransport = require('nodemailer-sendgrid-transport');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const User = require('../models/user');
+
+// const transporter = nodemailer.createTransport(
+//   sendgridTransport({
+//     auth: {
+//       api_key:
+//         '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'
+//     }
+//   })
+// ); 
 
 exports.getLogin = (req, res, next) => {
   //console.log(req.get('Cookie').split(';')[0].trim().split('=')[1]);
@@ -16,7 +29,6 @@ exports.getLogin = (req, res, next) => {
   } else {
     message = null;
   }
-
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
@@ -53,7 +65,7 @@ exports.postLogin = (req, res, next) => {
           if (doMatch) {
             req.session.isLoggedIn = true;
             req.session.user = user;
-      //res.setHeader('Set-Cookie', 'loggedIn=true;Max-Age=10');
+            //res.setHeader('Set-Cookie', 'loggedIn=true;Max-Age=10');
             return req.session.save(err => {
               console.log(err);
               res.redirect('/');
@@ -77,7 +89,10 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: email })
     .then(userDoc => {
       if (userDoc) {
-        req.flash('error', 'E-Mail exists already, please pick a different one.');
+        req.flash(
+          'error',
+          'E-Mail exists already, please pick a different one.'
+        );
         return res.redirect('/signup');
       }
       return bcrypt
@@ -92,6 +107,22 @@ exports.postSignup = (req, res, next) => {
         })
         .then(result => {
           res.redirect('/login');
+          return sgMail.send({
+            to: email,
+            from: 'test@example.com',
+            subject: 'Sending with Twilio SendGrid is Fun',
+            text: 'and easy to do anywhere, even with Node.js',
+            html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+          })
+          // return transporter.sendMail({
+          //   to: email,
+          //   from: 'shop@node-complete.com',
+          //   subject: 'Signup succeeded!',
+          //   html: '<h1>You successfully signed up!</h1>'
+          // });
+        })
+        .catch(err => {
+          console.log(err);
         });
     })
     .catch(err => {
@@ -103,5 +134,19 @@ exports.postLogout = (req, res, next) => {
   req.session.destroy(err => {
     console.log(err);
     res.redirect('/');
+  });
+};
+
+exports.getReset = (req, res, next) => {
+  let message = req.flash('error');
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render('auth/reset', {
+    path: '/reset',
+    pageTitle: 'Reset Password',
+    errorMessage: message
   });
 };
